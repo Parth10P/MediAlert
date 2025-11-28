@@ -37,9 +37,24 @@ function MainTabNavigator() {
           ),
         }}
       />
-      <Tab.Screen name="Daily Schedule" component={DailyScheduleScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Daily Schedule" component={DailyScheduleScreen} options={{
+          title: 'Daily Schedule',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }} />
+      <Tab.Screen name="History" component={HistoryScreen} options={{
+          title: 'History',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="time" size={size} color={color} />
+          ),
+        }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }} />
     </Tab.Navigator>
   );
 }
