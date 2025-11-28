@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { View, Text, Button, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -15,7 +14,7 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text>Welcome to MediAlert</Text>
+            <Text style={styles.text}>Welcome to MediAlert</Text>
             <Button onPress={handleLogout} title="Logout" />
         </View>
     );
@@ -24,35 +23,14 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
         justifyContent: 'center',
+        alignItems: 'center',
         padding: 20,
-    }
+    },
+    text: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
 })
-=======
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-
-const HomeScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Home Screen</Text>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
-
-export default HomeScreen;
->>>>>>> origin/main
