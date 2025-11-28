@@ -1,4 +1,15 @@
 import React from 'react';
+<<<<<<< HEAD
+import { View, Text } from 'react-native';
+
+export default function DailyScheduleScreen() {
+    return (
+        <View>
+            <Text>Daily Schedule Screen</Text>
+        </View>
+    );
+}
+=======
 import { View, Text, StyleSheet } from 'react-native';
 
 const DailyScheduleScreen = () => {
@@ -23,3 +34,4 @@ const styles = StyleSheet.create({
 });
 
 export default DailyScheduleScreen;
+>>>>>>> origin/main

@@ -1,4 +1,15 @@
 import React from 'react';
+<<<<<<< HEAD
+import { View, Text } from 'react-native';
+
+export default function HistoryScreen() {
+    return (
+        <View>
+            <Text>History Screen</Text>
+        </View>
+    );
+}
+=======
 import { View, Text, StyleSheet } from 'react-native';
 
 const HistoryScreen = () => {
@@ -23,3 +34,4 @@ const styles = StyleSheet.create({
 });
 
 export default HistoryScreen;
+>>>>>>> origin/main
