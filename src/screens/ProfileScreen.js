@@ -76,21 +76,8 @@ const ProfileScreen = ({ navigation }) => {
     };
 
     const handleLogout = async () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await AsyncStorage.removeItem('@current_user');
-                        navigation.replace('Login');
-                    },
-                },
-            ]
-        );
+        await AsyncStorage.removeItem('@current_user');
+        navigation.replace('Login');
     };
 
     return (
@@ -321,7 +308,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     logoutBtn: {
-        backgroundColor: '#e74c3c',
+        backgroundColor: 'red',
         borderRadius: 8,
         padding: 15,
         alignItems: 'center',
