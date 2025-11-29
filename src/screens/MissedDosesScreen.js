@@ -65,7 +65,8 @@ export default function MissedDosesScreen({ navigation }) {
         const todayStr = now.toDateString();
 
         const missed = meds.filter(med => {
-            if (med.taken) return false;
+            // If taken or skipped, it's not missed
+            if (med.taken || med.status === 'taken' || med.status === 'skipped') return false;
 
             // Construct a date object for the medicine time today
             const medTimeStr = `${todayStr} ${med.time}`;
@@ -91,6 +92,7 @@ export default function MissedDosesScreen({ navigation }) {
 
                 return {
                     ...med,
+                    status: 'taken',
                     taken: true,
                     stock: newStock,
                     lastTakenDate: new Date().toDateString()
@@ -103,8 +105,8 @@ export default function MissedDosesScreen({ navigation }) {
 
         // Update history
         const today = new Date().toISOString().split('T')[0];
-        const takenCount = updatedMeds.filter(m => m.taken).length;
-        const skippedCount = updatedMeds.filter(m => !m.taken).length;
+        const takenCount = updatedMeds.filter(m => m.status === 'taken').length;
+        const skippedCount = updatedMeds.filter(m => m.status === 'skipped').length;
         await saveHistory(today, takenCount, skippedCount);
 
         Alert.alert('Success', 'Medicine marked as taken!');
