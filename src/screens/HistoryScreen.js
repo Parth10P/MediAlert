@@ -42,6 +42,24 @@ const HistoryScreen = () => {
                             <Text style={styles.skippedLabel}>Skipped</Text>
                         </View>
                     </View>
+
+                    {history[date].details && history[date].details.length > 0 && (
+                        <View style={styles.detailsContainer}>
+                            <View style={styles.divider} />
+                            <Text style={styles.detailsHeader}>Daily Log</Text>
+                            {history[date].details.map((item, index) => (
+                                <View key={index} style={styles.detailItem}>
+                                    <View style={[styles.statusDot, { backgroundColor: item.status === 'taken' ? '#4CAF50' : item.status === 'skipped' ? '#F44336' : '#9E9E9E' }]} />
+                                    <View style={styles.detailInfo}>
+                                        <Text style={styles.detailName}>{item.name}</Text>
+                                    </View>
+                                    <Text style={[styles.detailStatus, { color: item.status === 'taken' ? '#4CAF50' : item.status === 'skipped' ? '#F44336' : '#9E9E9E' }]}>
+                                        {item.status === 'taken' ? 'Taken' : item.status === 'skipped' ? 'Skipped' : 'Pending'}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
                 </View>
             ))}
         </ScrollView>
@@ -111,6 +129,44 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         color: '#999',
+    },
+    detailsContainer: {
+        marginTop: 15,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#eee',
+        marginBottom: 10,
+    },
+    detailsHeader: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+    },
+    detailItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        paddingVertical: 5,
+    },
+    statusDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginRight: 10,
+    },
+    detailInfo: {
+        flex: 1,
+    },
+    detailName: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#333',
+    },
+    detailStatus: {
+        fontSize: 13,
+        fontWeight: '600',
     },
 });
 

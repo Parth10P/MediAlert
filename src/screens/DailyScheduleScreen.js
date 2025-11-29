@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { getMedicines, updateMedicineStatus, saveHistory, fillMissingHistory } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -84,7 +85,16 @@ export default function DailyScheduleScreen({ navigation }) {
     const today = new Date().toISOString().split('T')[0];
     const taken = updatedMedicines.filter(m => m.status === 'taken').length;
     const skipped = updatedMedicines.filter(m => m.status === 'skipped').length;
-    await saveHistory(today, taken, skipped);
+
+    const details = updatedMedicines.map(m => ({
+      id: m.id,
+      name: m.name,
+      time: m.time,
+      status: m.status,
+      color: m.color
+    }));
+
+    await saveHistory(today, taken, skipped, details);
   };
 
   return (

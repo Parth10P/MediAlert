@@ -32,11 +32,11 @@ export const updateMedicineStatus = async (medicines) => {
   }
 };
 
-export const saveHistory = async (date, taken, skipped) => {
+export const saveHistory = async (date, taken, skipped, details = []) => {
   try {
     const existing = await AsyncStorage.getItem(HISTORY_KEY);
     const history = existing ? JSON.parse(existing) : {};
-    history[date] = { taken, skipped };
+    history[date] = { taken, skipped, details };
     await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
   } catch (error) {
     console.log('Error saving history:', error);
@@ -83,7 +83,7 @@ export const fillMissingHistory = async (totalMedicinesCount) => {
       if (currentDateStr >= todayStr) break;
 
       if (!history[currentDateStr]) {
-        history[currentDateStr] = { taken: 0, skipped: totalMedicinesCount };
+        history[currentDateStr] = { taken: 0, skipped: totalMedicinesCount, details: [] };
         hasUpdates = true;
       }
 
