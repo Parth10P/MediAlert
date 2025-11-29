@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getMedicines, updateMedicineStatus, saveHistory, fillMissingHistory } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -13,7 +13,7 @@ const iconMap = {
   6: <Ionicons name="heart" size={22} />,
 };
 
-export default function DailyScheduleScreen() {
+export default function DailyScheduleScreen({ navigation }) {
   const [medicines, setMedicines] = useState([]);
 
   useFocusEffect(
@@ -27,58 +27,63 @@ export default function DailyScheduleScreen() {
     const today = new Date().toDateString();
 
     const updatedMeds = meds.map(med => {
+      // Migration: Ensure status field exists
+      let status = med.status;
+      if (!status) {
+        status = med.taken ? 'taken' : 'pending';
+      }
 
       if (med.lastTakenDate !== today) {
-        return { ...med, taken: false };
+        // Reset for new day
+        return { ...med, status: 'pending', taken: false };
       }
-      return med;
+      return { ...med, status };
     });
 
     setMedicines(updatedMeds);
-    
     if (JSON.stringify(meds) !== JSON.stringify(updatedMeds)) {
       await updateMedicineStatus(updatedMeds);
     }
-    
     await fillMissingHistory(updatedMeds.length);
   };
 
-  const toggleTaken = async (id) => {
+  const updateStatus = async (id, newStatus) => {
     const updatedMedicines = medicines.map(med => {
       if (med.id === id) {
-        const isTaking = !med.taken;
         let newStock = med.stock;
 
+        // Handle stock logic
         if (med.stock !== null && med.stock !== undefined) {
-          if (isTaking) {
+          // If marking as taken
+          if (newStatus === 'taken' && med.status !== 'taken') {
             newStock = med.stock > 0 ? med.stock - 1 : 0;
             if (newStock <= 5) {
               alert(`Low stock for ${med.name}: ${newStock} left!`);
             }
-          } else {
+          }
+          // If un-taking (going back to pending or skipped)
+          else if (med.status === 'taken' && newStatus !== 'taken') {
             newStock = med.stock + 1;
           }
         }
 
-        return { 
-          ...med, 
-          taken: isTaking, 
+        return {
+          ...med,
+          status: newStatus,
+          taken: newStatus === 'taken', // Maintain legacy compatibility if needed, or deprecate
           stock: newStock,
-          lastTakenDate: isTaking ? new Date().toDateString() : med.lastTakenDate
+          lastTakenDate: newStatus === 'taken' ? new Date().toDateString() : med.lastTakenDate
         };
       }
       return med;
     });
 
     setMedicines(updatedMedicines);
-
-
     await updateMedicineStatus(updatedMedicines);
 
-
     const today = new Date().toISOString().split('T')[0];
-    const taken = updatedMedicines.filter(m => m.taken).length;
-    const skipped = updatedMedicines.filter(m => !m.taken).length;
+    const taken = updatedMedicines.filter(m => m.status === 'taken').length;
+    const skipped = updatedMedicines.filter(m => m.status === 'skipped').length;
     await saveHistory(today, taken, skipped);
   };
 
@@ -86,80 +91,141 @@ export default function DailyScheduleScreen() {
     const meds = await getMedicines();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     const agedMeds = meds.map(med => ({
       ...med,
       lastTakenDate: yesterday.toDateString()
     }));
-    
+
     await updateMedicineStatus(agedMeds);
-    await loadMedicines(); 
+    await loadMedicines();
     alert('Simulated passing of a day! The list has been refreshed.');
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <Text style={styles.header}>Today's Schedule</Text>
-        <TouchableOpacity onPress={simulateNextDay} style={{ padding: 5 }}>
-          <Text style={{ color: 'blue', fontSize: 12 }}>Simulate Tomorrow</Text>
-        </TouchableOpacity>
-      </View>
-
-      {medicines.length === 0 && (
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>No medicines added yet.</Text>
-          <Text style={styles.emptySub}>Tap + on Home to add medicines</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>Today's Schedule</Text>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity onPress={() => navigation.navigate('MissedDoses')} style={styles.actionBtn}>
+              <Ionicons name="alert-circle-outline" size={16} color="#FF6B6B" />
+              <Text style={styles.missedText}>Missed Doses</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={simulateNextDay} style={styles.actionBtn}>
+              <Ionicons name="time-outline" size={16} color="blue" />
+              <Text style={styles.simulateText}>Simulate Tomorrow</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
 
-      {medicines.map(med => (
-        <View key={med.id} style={[styles.card, { borderLeftColor: med.color }]}>
-          <View style={styles.cardLeft}>
-            <View style={[styles.iconHolder, { backgroundColor: med.color + '33' }]}>
-              {iconMap[med.icon]}
+        {medicines.length === 0 && (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>No medicines added yet.</Text>
+            <Text style={styles.emptySub}>Tap + on Home to add medicines</Text>
+          </View>
+        )}
+
+        {medicines.map(med => (
+          <View key={med.id} style={[styles.card, { borderLeftColor: med.color }]}>
+            <View style={styles.cardLeft}>
+              <View style={[styles.iconHolder, { backgroundColor: med.color + '33' }]}>
+                {iconMap[med.icon]}
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={styles.medName}>{med.name}</Text>
+                <Text style={styles.medDetails}>{med.dosage} • {med.time}</Text>
+                {med.stock !== null && (
+                  <Text style={[styles.stockText, med.stock <= 5 && styles.lowStock]}>
+                    Stock: {med.stock}
+                  </Text>
+                )}
+                {med.familyMember ? (
+                  <Text style={styles.memberTag}>For {med.familyMember}</Text>
+                ) : null}
+              </View>
             </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.medName}>{med.name}</Text>
-              <Text style={styles.medDetails}>{med.dosage} • {med.time}</Text>
-              {med.stock !== null && (
-                <Text style={[styles.stockText, med.stock <= 5 && styles.lowStock]}>
-                  Stock: {med.stock}
-                </Text>
+
+            <View style={styles.actionButtons}>
+              {med.status === 'taken' ? (
+                <TouchableOpacity onPress={() => updateStatus(med.id, 'pending')} style={[styles.statusBtn, styles.takenBtn]}>
+                  <Text style={styles.statusText}>Taken</Text>
+                </TouchableOpacity>
+              ) : med.status === 'skipped' ? (
+                <TouchableOpacity onPress={() => updateStatus(med.id, 'pending')} style={[styles.statusBtn, styles.skippedBtn]}>
+                  <Text style={styles.statusText}>Skipped</Text>
+                </TouchableOpacity>
+              ) : (
+                <>
+                  <TouchableOpacity onPress={() => updateStatus(med.id, 'taken')} style={[styles.statusBtn, styles.takeBtn]}>
+                    <Text style={styles.statusText}>Take</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => updateStatus(med.id, 'skipped')} style={[styles.statusBtn, styles.skipBtn]}>
+                    <Text style={styles.statusText}>Skip</Text>
+                  </TouchableOpacity>
+                </>
               )}
-              {med.familyMember ? (
-                <Text style={styles.memberTag}>For {med.familyMember}</Text>
-              ) : null}
             </View>
           </View>
-
-          <TouchableOpacity
-            onPress={() => toggleTaken(med.id)}
-            style={[
-              styles.statusBtn,
-              med.taken ? styles.taken : styles.notTaken,
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {med.taken ? 'Taken' : 'Take'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 15 },
-  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 15 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f8f8f8',
+  },
+  container: {
+    flex: 1,
+    padding: 15,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    flexWrap: 'wrap',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    backgroundColor: '#e0e0e0',
+  },
+  missedText: {
+    marginLeft: 5,
+    fontSize: 12,
+    color: '#FF6B6B',
+    fontWeight: '600',
+  },
+  simulateText: {
+    marginLeft: 5,
+    fontSize: 12,
+    color: 'blue',
+    fontWeight: '600',
+  },
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderLeftWidth: 6,
-    padding: 12,
-    borderRadius: 10,
+    alignItems: 'center',
+    padding: 15,
     backgroundColor: '#fafafa',
+    borderRadius: 10,
+    borderLeftWidth: 5,
     marginBottom: 12,
     elevation: 2,
   },
@@ -179,15 +245,22 @@ const styles = StyleSheet.create({
   lowStock: { color: '#FF6B6B', fontWeight: 'bold' },
   memberTag: { fontSize: 13, marginTop: 3, color: '#555' },
 
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   statusBtn: {
     paddingVertical: 6,
-    paddingHorizontal: 18,
-    borderRadius: 50,
-    alignSelf: 'center',
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    minWidth: 70,
+    alignItems: 'center',
   },
-  taken: { backgroundColor: '#6BCB77' },
-  notTaken: { backgroundColor: '#FF6B6B' },
-  statusText: { color: '#fff', fontWeight: 'bold' },
+  takeBtn: { backgroundColor: '#4D96FF' },
+  takenBtn: { backgroundColor: '#6BCB77' },
+  skipBtn: { backgroundColor: '#FFB74D' },
+  skippedBtn: { backgroundColor: '#9E9E9E' },
+  statusText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
 
   emptyBox: { alignItems: 'center', marginTop: 80 },
   emptyText: { fontSize: 18, fontWeight: '600', color: '#555' },

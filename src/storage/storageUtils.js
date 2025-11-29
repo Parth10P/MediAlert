@@ -57,14 +57,13 @@ export const fillMissingHistory = async (totalMedicinesCount) => {
   try {
     const existing = await AsyncStorage.getItem(HISTORY_KEY);
     const history = existing ? JSON.parse(existing) : {};
-    
     const dates = Object.keys(history).sort();
-    
+
     if (dates.length === 0) return;
-    
+
     const lastDateStr = dates[dates.length - 1];
     const lastDate = new Date(lastDateStr);
-    
+
     const getLocalDateStr = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -76,25 +75,24 @@ export const fillMissingHistory = async (totalMedicinesCount) => {
 
     let currentDate = new Date(lastDate);
     currentDate.setDate(currentDate.getDate() + 1);
-    
+
     let hasUpdates = false;
-    
+
     while (true) {
-        const currentDateStr = getLocalDateStr(currentDate);
-        if (currentDateStr >= todayStr) break;
-        
-        if (!history[currentDateStr]) {
-            history[currentDateStr] = { taken: 0, skipped: totalMedicinesCount };
-            hasUpdates = true;
-        }
-        
-        currentDate.setDate(currentDate.getDate() + 1);
+      const currentDateStr = getLocalDateStr(currentDate);
+      if (currentDateStr >= todayStr) break;
+
+      if (!history[currentDateStr]) {
+        history[currentDateStr] = { taken: 0, skipped: totalMedicinesCount };
+        hasUpdates = true;
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     if (hasUpdates) {
-        await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     }
-    
   } catch (error) {
     console.log('Error filling missing history:', error);
   }
