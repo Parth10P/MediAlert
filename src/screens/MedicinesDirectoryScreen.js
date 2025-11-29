@@ -7,14 +7,19 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import medicinesData from '../../db/medicines.json';
+import MedicineDetailsModal from '../components/MedicineDetailsModal';
 
 const MedicinesDirectoryScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMedicines, setFilteredMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
 
   useEffect(() => {
     // Simulate initial load or just set data
@@ -55,7 +60,13 @@ const MedicinesDirectoryScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
+    <TouchableOpacity 
+      style={styles.itemContainer}
+      onPress={() => {
+        setSelectedMedicine(item);
+        setModalVisible(true);
+      }}
+    >
       <View style={styles.iconContainer}>
         <Ionicons name="medkit-outline" size={24} color="#4D96FF" />
       </View>
@@ -63,7 +74,7 @@ const MedicinesDirectoryScreen = ({ navigation }) => {
         <Text style={styles.medicineName}>{item.name}</Text>
         <Text style={styles.medicineCategory}>{item.category}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -105,6 +116,11 @@ const MedicinesDirectoryScreen = ({ navigation }) => {
           windowSize={10}
         />
       )}
+      <MedicineDetailsModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        medicine={selectedMedicine}
+      />
     </View>
   );
 };

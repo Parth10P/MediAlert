@@ -60,7 +60,7 @@ export default function DailyScheduleScreen() {
             <View style={[styles.iconHolder, { backgroundColor: med.color + '33' }]}>
               {iconMap[med.icon]}
             </View>
-            <View>
+            <View style={styles.textContainer}>
               <Text style={styles.medName}>{med.name}</Text>
               <Text style={styles.medDetails}>{med.dosage} • {med.time}</Text>
               {med.familyMember ? (
@@ -99,7 +99,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 2,
   },
-  cardLeft: { flexDirection: 'row', alignItems: 'center' },
+  cardLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  textContainer: { flex: 1 },
   iconHolder: {
     width: 45,
     height: 45,
