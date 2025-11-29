@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getMedicines, updateMedicineStatus, saveHistory } from '../storage/storageUtils';
+import { getMedicines, updateMedicineStatus, saveHistory, fillMissingHistory } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const iconMap = {
@@ -47,7 +47,7 @@ export default function DailyScheduleScreen({ navigation }) {
       await updateMedicineStatus(updatedMeds);
     }
 
-    // await fillMissingHistory(updatedMeds.length); // Commenting out until verified
+    await fillMissingHistory(updatedMeds.length);
   };
 
   const updateStatus = async (id, newStatus) => {
