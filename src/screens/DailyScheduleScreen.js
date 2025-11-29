@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getMedicines } from '../storage/storageUtils';
+import { getMedicines, updateMedicineStatus, saveHistory } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const iconMap = {
@@ -27,12 +27,20 @@ export default function DailyScheduleScreen() {
     setMedicines(meds);
   };
 
-  const toggleTaken = (id) => {
-    setMedicines(prev =>
-      prev.map(med =>
-        med.id === id ? { ...med, taken: !med.taken } : med
-      )
+  const toggleTaken = async (id) => {
+    const updatedMedicines = medicines.map(med =>
+      med.id === id ? { ...med, taken: !med.taken } : med
     );
+    setMedicines(updatedMedicines);
+
+    // Save to storage
+    await updateMedicineStatus(updatedMedicines);
+
+    // Update history
+    const today = new Date().toISOString().split('T')[0];
+    const taken = updatedMedicines.filter(m => m.taken).length;
+    const skipped = updatedMedicines.filter(m => !m.taken).length;
+    await saveHistory(today, taken, skipped);
   };
 
   return (
