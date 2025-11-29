@@ -1,74 +1,34 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation }) {
-  const medicines = [
-    {
-      id: 1,
-      name: "Aspirin",
-      dose: "1 tablet - Daily",
-      for: "Mom",
-      iconBg: "#e0f7f4",
-      iconColor: "#0aa78f",
-    },
-    {
-      id: 2,
-      name: "Paracetamol",
-      dose: "1 tablet - Daily",
-      for: "Dad",
-      iconBg: "#ffece7",
-      iconColor: "#ff5722",
-    },
-  ];
-
-  const renderMed = ({ item }) => (
-    <View style={styles.medCard}>
-      <View style={[styles.medIcon, { backgroundColor: item.iconBg }]}>
-        <Ionicons name="medkit-outline" size={22} color={item.iconColor} />
-      </View>
-
-      <View style={{ flex: 1 }}>
-        <Text style={styles.medName}>{item.name}</Text>
-        <Text style={styles.medDose}>{item.dose}</Text>
-        <Text style={styles.medFor}>For: {item.for}</Text>
-      </View>
-
-      <Ionicons name="chevron-forward" size={20} color="#777" />
-    </View>
-  );
-
   return (
     <View style={styles.container}>
 
-      <Text style={styles.appTitle}>MediAlert</Text>
 
-      
-      <Text style={styles.title}>Good Evening</Text>
-      <Text style={styles.subtitle}>Here is your daily summary</Text>
+      <Text style={styles.title}>MediAlert</Text>
+
+  
+      <Text style={styles.text}>Welcome to MediAlert</Text>
+
+   
+      <TouchableOpacity
+        style={styles.directoryButton}
+        onPress={() => navigation.navigate('MedicinesDirectory')}
+      >
+        <Ionicons name="search" size={24} color="#fff" style={{ marginRight: 10 }} />
+        <Text style={styles.directoryButtonText}>Medicines Directory</Text>
+      </TouchableOpacity>
 
 
-      <View style={styles.progressCard}>
-        <Text style={styles.progressTitle}>Today's Progress</Text>
-        <Text style={styles.progressSubtitle}>0 of 2 doses taken</Text>
-      </View>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('AddMedicine')}
+      >
+        <Ionicons name="add" size={32} color="#fff" />
+      </TouchableOpacity>
 
-    
-      <View style={styles.medicineHeader}>
-        <Text style={styles.sectionTitle}>Your Medicines</Text>
-
-        <TouchableOpacity onPress={() => navigation.navigate("AddMedicine")}>
-          <Text style={styles.addBtn}>+ Add</Text>
-        </TouchableOpacity>
-      </View>
-
-     
-      <FlatList
-        data={medicines}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderMed}
-        contentContainerStyle={{ paddingBottom: 60 }}
-      />
     </View>
   );
 }
@@ -76,90 +36,64 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 18,
-    paddingTop: 10, 
-  },
-
-  appTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
+    paddingTop: 30,           
+    paddingHorizontal: 20,  
+    backgroundColor: '#fff',
   },
 
   title: {
-    fontSize: 26,
-    fontWeight: "700",
-  },
-  subtitle: {
-    fontSize: 15,
-    color: "#555",
-    marginBottom: 20,
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 10,         
   },
 
-  progressCard: {
-    backgroundColor: "#2d74f0",
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 26,
-  },
-  progressTitle: {
-    color: "#fff",
+  text: {
     fontSize: 18,
-    fontWeight: "600",
-  },
-  progressSubtitle: {
-    color: "#dbe6ff",
-    marginTop: 6,
-    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',      
   },
 
-  medicineHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  addBtn: {
-    fontSize: 16,
-    color: "#2d74f0",
-    fontWeight: "600",
-  },
-
-  medCard: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 16,
-    marginBottom: 14,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  medIcon: {
-    width: 50,
-    height: 50,
+  directoryButton: {
+    flexDirection: 'row',
+    backgroundColor: '#4D96FF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 15,
+    alignItems: 'center',
+    alignSelf: 'center',     
+    marginBottom: 20,
+
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  medName: {
-    fontSize: 17,
-    fontWeight: "700",
+
+  directoryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  medDose: {
-    fontSize: 14,
-    color: "#555",
-  },
-  medFor: {
-    fontSize: 13,
-    color: "#888",
+
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#0d6efd',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
