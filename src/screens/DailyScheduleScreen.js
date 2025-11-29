@@ -27,7 +27,7 @@ export default function DailyScheduleScreen() {
     const today = new Date().toDateString();
 
     const updatedMeds = meds.map(med => {
-      // If the last taken date is not today, reset taken to false
+
       if (med.lastTakenDate !== today) {
         return { ...med, taken: false };
       }
@@ -71,16 +71,17 @@ export default function DailyScheduleScreen() {
 
     setMedicines(updatedMedicines);
 
-    // Save to storage
+
     await updateMedicineStatus(updatedMedicines);
 
-    // Update history
+
     const today = new Date().toISOString().split('T')[0];
     const taken = updatedMedicines.filter(m => m.taken).length;
     const skipped = updatedMedicines.filter(m => !m.taken).length;
     await saveHistory(today, taken, skipped);
   };
 
+  // Simulate next day for testing purposes
   const simulateNextDay = async () => {
     const meds = await getMedicines();
     const yesterday = new Date();
@@ -92,7 +93,7 @@ export default function DailyScheduleScreen() {
     }));
     
     await updateMedicineStatus(agedMeds);
-    await loadMedicines(); // Reload to trigger the reset logic immediately
+    await loadMedicines(); 
     alert('Simulated passing of a day! The list has been refreshed.');
   };
 
