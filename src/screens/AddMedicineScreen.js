@@ -150,7 +150,7 @@ const AddMedicineScreen = ({ navigation }) => {
         onChangeText={setFamilyMember}
       />
 
-      <Text style={styles.label}>Stock (Optional)</Text>
+      <Text style={styles.label}>Stock</Text>
       <TextInput
         style={styles.input}
         placeholder="Total pills"
