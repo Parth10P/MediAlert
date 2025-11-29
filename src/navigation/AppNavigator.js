@@ -12,6 +12,7 @@ import MedicinesDirectoryScreen from '../screens/MedicinesDirectoryScreen';
 import DailyScheduleScreen from '../screens/DailyScheduleScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MissedDosesScreen from '../screens/MissedDosesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,23 +41,23 @@ function MainTabNavigator() {
         }}
       />
       <Tab.Screen name="Daily Schedule" component={DailyScheduleScreen} options={{
-          title: 'Daily Schedule',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
-          ),
-        }} />
+        title: 'Daily Schedule',
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="calendar" size={size} color={color} />
+        ),
+      }} />
       <Tab.Screen name="History" component={HistoryScreen} options={{
-          title: 'History',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" size={size} color={color} />
-          ),
-        }} />
+        title: 'History',
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="time" size={size} color={color} />
+        ),
+      }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
-        }} />
+        title: 'Profile',
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="person" size={size} color={color} />
+        ),
+      }} />
     </Tab.Navigator>
   );
 }
@@ -68,6 +69,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Home" component={MainTabNavigator} />
+        <Stack.Screen name="MissedDoses" component={MissedDosesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
