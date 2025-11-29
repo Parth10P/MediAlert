@@ -12,7 +12,6 @@ import MedicinesDirectoryScreen from '../screens/MedicinesDirectoryScreen';
 import DailyScheduleScreen from '../screens/DailyScheduleScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import MissedDosesScreen from '../screens/MissedDosesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -69,7 +68,6 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Home" component={MainTabNavigator} />
-        <Stack.Screen name="MissedDoses" component={MissedDosesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

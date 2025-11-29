@@ -72,7 +72,7 @@ export default function DailyScheduleScreen({ navigation }) {
           status: newStatus,
           taken: newStatus === 'taken', // Maintain legacy compatibility if needed, or deprecate
           stock: newStock,
-          lastTakenDate: newStatus === 'taken' ? new Date().toDateString() : med.lastTakenDate
+          lastTakenDate: (newStatus === 'taken' || newStatus === 'skipped') ? new Date().toDateString() : med.lastTakenDate
         };
       }
       return med;
@@ -87,36 +87,11 @@ export default function DailyScheduleScreen({ navigation }) {
     await saveHistory(today, taken, skipped);
   };
 
-  const simulateNextDay = async () => {
-    const meds = await getMedicines();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const agedMeds = meds.map(med => ({
-      ...med,
-      lastTakenDate: yesterday.toDateString()
-    }));
-
-    await updateMedicineStatus(agedMeds);
-    await loadMedicines();
-    alert('Simulated passing of a day! The list has been refreshed.');
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Today's Schedule</Text>
-          <View style={styles.actionsRow}>
-            <TouchableOpacity onPress={() => navigation.navigate('MissedDoses')} style={styles.actionBtn}>
-              <Ionicons name="alert-circle-outline" size={16} color="#FF6B6B" />
-              <Text style={styles.missedText}>Missed Doses</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={simulateNextDay} style={styles.actionBtn}>
-              <Ionicons name="time-outline" size={16} color="blue" />
-              <Text style={styles.simulateText}>Simulate Tomorrow</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {medicines.length === 0 && (
@@ -210,12 +185,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 12,
     color: '#FF6B6B',
-    fontWeight: '600',
-  },
-  simulateText: {
-    marginLeft: 5,
-    fontSize: 12,
-    color: 'blue',
     fontWeight: '600',
   },
   card: {
