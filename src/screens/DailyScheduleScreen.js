@@ -72,7 +72,7 @@ export default function DailyScheduleScreen({ navigation }) {
           status: newStatus,
           taken: newStatus === 'taken', // Maintain legacy compatibility if needed, or deprecate
           stock: newStock,
-          lastTakenDate: newStatus === 'taken' ? new Date().toDateString() : med.lastTakenDate
+          lastTakenDate: (newStatus === 'taken' || newStatus === 'skipped') ? new Date().toDateString() : med.lastTakenDate
         };
       }
       return med;
@@ -92,12 +92,6 @@ export default function DailyScheduleScreen({ navigation }) {
       <ScrollView style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Today's Schedule</Text>
-          <View style={styles.actionsRow}>
-            <TouchableOpacity onPress={() => navigation.navigate('MissedDoses')} style={styles.actionBtn}>
-              <Ionicons name="alert-circle-outline" size={16} color="#FF6B6B" />
-              <Text style={styles.missedText}>Missed Doses</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {medicines.length === 0 && (
