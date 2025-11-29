@@ -78,6 +78,10 @@ medi-alert/
     └── styles/
         └── globalStyles.js
 ```
+# contributors
+[![GitHub contributors](https://img.shields.io/github/contributors/Parth10P/MediAlert)](https://github.com/Parth10P/MediAlert/graphs/contributors)
+
+[![Contributors](https://contrib.rocks/image?repo=Parth10P/MediAlert)](https://github.com/Parth10P/MediAlert/graphs/contributors)
 
 ---
 
