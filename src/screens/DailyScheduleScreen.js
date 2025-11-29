@@ -41,12 +41,9 @@ export default function DailyScheduleScreen({ navigation }) {
     });
 
     setMedicines(updatedMeds);
-
-    // If we reset any medicines, update storage
     if (JSON.stringify(meds) !== JSON.stringify(updatedMeds)) {
       await updateMedicineStatus(updatedMeds);
     }
-
     await fillMissingHistory(updatedMeds.length);
   };
 
@@ -90,7 +87,6 @@ export default function DailyScheduleScreen({ navigation }) {
     await saveHistory(today, taken, skipped);
   };
 
-  // Simulate next day for testing purposes
   const simulateNextDay = async () => {
     const meds = await getMedicines();
     const yesterday = new Date();

@@ -57,7 +57,6 @@ export const fillMissingHistory = async (totalMedicinesCount) => {
   try {
     const existing = await AsyncStorage.getItem(HISTORY_KEY);
     const history = existing ? JSON.parse(existing) : {};
-
     const dates = Object.keys(history).sort();
 
     if (dates.length === 0) return;
