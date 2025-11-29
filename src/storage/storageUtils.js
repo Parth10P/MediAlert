@@ -53,10 +53,11 @@ export const getHistory = async () => {
   }
 };
 
-export const fillMissingHistory = async (totalMedicines) => {
+export const fillMissingHistory = async (totalMedicinesCount) => {
   try {
-    const history = await getHistory();
-    const today = new Date();
+    const existing = await AsyncStorage.getItem(HISTORY_KEY);
+    const history = existing ? JSON.parse(existing) : {};
+
     const dates = Object.keys(history).sort();
 
     if (dates.length === 0) return;
@@ -64,25 +65,33 @@ export const fillMissingHistory = async (totalMedicines) => {
     const lastDateStr = dates[dates.length - 1];
     const lastDate = new Date(lastDateStr);
 
-    // Iterate from day after last record until yesterday
-    const nextDay = new Date(lastDate);
-    nextDay.setDate(nextDay.getDate() + 1);
+    const getLocalDateStr = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
-    let changed = false;
+    const todayStr = getLocalDateStr(new Date());
 
-    while (nextDay < today) {
-      const dateStr = nextDay.toISOString().split('T')[0];
-      if (!history[dateStr]) {
-        // Assume 0 taken, all skipped (or just 0 taken)
-        // For now, we'll record 0 taken and 0 skipped (or total skipped if strict)
-        // Let's record 0 taken, 0 skipped to indicate no activity
-        history[dateStr] = { taken: 0, skipped: 0 };
-        changed = true;
+    let currentDate = new Date(lastDate);
+    currentDate.setDate(currentDate.getDate() + 1);
+
+    let hasUpdates = false;
+
+    while (true) {
+      const currentDateStr = getLocalDateStr(currentDate);
+      if (currentDateStr >= todayStr) break;
+
+      if (!history[currentDateStr]) {
+        history[currentDateStr] = { taken: 0, skipped: totalMedicinesCount };
+        hasUpdates = true;
       }
-      nextDay.setDate(nextDay.getDate() + 1);
+
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    if (changed) {
+    if (hasUpdates) {
       await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     }
   } catch (error) {
