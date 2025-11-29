@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { getMedicines } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
@@ -15,9 +16,11 @@ const iconMap = {
 export default function DailyScheduleScreen() {
   const [medicines, setMedicines] = useState([]);
 
-  useEffect(() => {
-    loadMedicines();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadMedicines();
+    }, [])
+  );
 
   const loadMedicines = async () => {
     const meds = await getMedicines();
