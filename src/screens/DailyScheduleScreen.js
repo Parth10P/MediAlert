@@ -24,13 +24,51 @@ export default function DailyScheduleScreen() {
 
   const loadMedicines = async () => {
     const meds = await getMedicines();
-    setMedicines(meds);
+    const today = new Date().toDateString();
+
+    const updatedMeds = meds.map(med => {
+      // If the last taken date is not today, reset taken to false
+      if (med.lastTakenDate !== today) {
+        return { ...med, taken: false };
+      }
+      return med;
+    });
+
+    setMedicines(updatedMeds);
+    
+    // If we reset any medicines, update storage
+    if (JSON.stringify(meds) !== JSON.stringify(updatedMeds)) {
+      await updateMedicineStatus(updatedMeds);
+    }
   };
 
   const toggleTaken = async (id) => {
-    const updatedMedicines = medicines.map(med =>
-      med.id === id ? { ...med, taken: !med.taken } : med
-    );
+    const updatedMedicines = medicines.map(med => {
+      if (med.id === id) {
+        const isTaking = !med.taken;
+        let newStock = med.stock;
+
+        if (med.stock !== null && med.stock !== undefined) {
+          if (isTaking) {
+            newStock = med.stock > 0 ? med.stock - 1 : 0;
+            if (newStock <= 5) {
+              alert(`Low stock for ${med.name}: ${newStock} left!`);
+            }
+          } else {
+            newStock = med.stock + 1;
+          }
+        }
+
+        return { 
+          ...med, 
+          taken: isTaking, 
+          stock: newStock,
+          lastTakenDate: isTaking ? new Date().toDateString() : med.lastTakenDate
+        };
+      }
+      return med;
+    });
+
     setMedicines(updatedMedicines);
 
     // Save to storage
@@ -43,9 +81,29 @@ export default function DailyScheduleScreen() {
     await saveHistory(today, taken, skipped);
   };
 
+  const simulateNextDay = async () => {
+    const meds = await getMedicines();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const agedMeds = meds.map(med => ({
+      ...med,
+      lastTakenDate: yesterday.toDateString()
+    }));
+    
+    await updateMedicineStatus(agedMeds);
+    await loadMedicines(); // Reload to trigger the reset logic immediately
+    alert('Simulated passing of a day! The list has been refreshed.');
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Today's Schedule</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <Text style={styles.header}>Today's Schedule</Text>
+        <TouchableOpacity onPress={simulateNextDay} style={{ padding: 5 }}>
+          <Text style={{ color: 'blue', fontSize: 12 }}>Simulate Tomorrow</Text>
+        </TouchableOpacity>
+      </View>
 
       {medicines.length === 0 && (
         <View style={styles.emptyBox}>
@@ -63,6 +121,11 @@ export default function DailyScheduleScreen() {
             <View style={styles.textContainer}>
               <Text style={styles.medName}>{med.name}</Text>
               <Text style={styles.medDetails}>{med.dosage} • {med.time}</Text>
+              {med.stock !== null && (
+                <Text style={[styles.stockText, med.stock <= 5 && styles.lowStock]}>
+                  Stock: {med.stock}
+                </Text>
+              )}
               {med.familyMember ? (
                 <Text style={styles.memberTag}>For {med.familyMember}</Text>
               ) : null}
@@ -111,6 +174,8 @@ const styles = StyleSheet.create({
   },
   medName: { fontSize: 16, fontWeight: '600' },
   medDetails: { fontSize: 14, color: 'gray', marginTop: 2 },
+  stockText: { fontSize: 12, color: '#666', marginTop: 2 },
+  lowStock: { color: '#FF6B6B', fontWeight: 'bold' },
   memberTag: { fontSize: 13, marginTop: 3, color: '#555' },
 
   statusBtn: {
