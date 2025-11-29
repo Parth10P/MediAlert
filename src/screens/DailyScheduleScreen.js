@@ -46,6 +46,8 @@ export default function DailyScheduleScreen({ navigation }) {
     if (JSON.stringify(meds) !== JSON.stringify(updatedMeds)) {
       await updateMedicineStatus(updatedMeds);
     }
+
+    // await fillMissingHistory(updatedMeds.length); // Commenting out until verified
   };
 
   const updateStatus = async (id, newStatus) => {
