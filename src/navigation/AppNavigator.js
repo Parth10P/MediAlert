@@ -8,6 +8,7 @@ import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import AddMedicineScreen from '../screens/AddMedicineScreen';
+import MedicinesDirectoryScreen from '../screens/MedicinesDirectoryScreen';
 import DailyScheduleScreen from '../screens/DailyScheduleScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -20,6 +21,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeMain" component={HomeScreen} />
       <Stack.Screen name="AddMedicine" component={AddMedicineScreen} />
+      <Stack.Screen name="MedicinesDirectory" component={MedicinesDirectoryScreen} />
     </Stack.Navigator>
   );
 }

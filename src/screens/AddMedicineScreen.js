@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  FlatList,
+  Modal,
 } from 'react-native';
 import {
   Ionicons,
@@ -15,6 +17,7 @@ import {
 } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { saveMedicine } from '../storage/storageUtils';
+import medicinesData from '../../db/medicines.json';
 
 const icons = [
   { id: 1, icon: <Ionicons name="medkit" size={22} /> },
@@ -37,9 +40,49 @@ const AddMedicineScreen = ({ navigation }) => {
   const [selectedIcon, setSelectedIcon] = useState(icons[0].id);
   const [selectedColor, setSelectedColor] = useState(colors[0]);
 
+
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredMedicines, setFilteredMedicines] = useState([]);
+
   const onTimeChange = (event, selected) => {
     setShowPicker(false);
     if (selected) setTime(selected);
+  };
+
+  const handleNameChange = (text) => {
+    setName(text);
+    if (text.length > 1) {
+      const textData = text.toUpperCase();
+      
+      const newData = medicinesData.filter((item) => {
+        const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      }).sort((a, b) => {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+        
+        if (nameA === textData && nameB !== textData) return -1;
+        if (nameB === textData && nameA !== textData) return 1;
+        
+        const aStartsWith = nameA.startsWith(textData);
+        const bStartsWith = nameB.startsWith(textData);
+        if (aStartsWith && !bStartsWith) return -1;
+        if (!aStartsWith && bStartsWith) return 1;
+        
+        // Priority 3: Alphabetical
+        return nameA.localeCompare(nameB);
+      });
+
+      setFilteredMedicines(newData.slice(0, 10)); // Limit to 10 suggestions
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const selectMedicine = (medicineName) => {
+    setName(medicineName);
+    setShowDropdown(false);
   };
 
   const handleSave = async () => {
@@ -66,14 +109,30 @@ const AddMedicineScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       <Text style={styles.label}>Medicine Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="e.g. Aspirin"
-        value={name}
-        onChangeText={setName}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Aspirin"
+          value={name}
+          onChangeText={handleNameChange}
+          onFocus={() => name.length > 1 && setShowDropdown(true)}
+        />
+        {showDropdown && filteredMedicines.length > 0 && (
+          <View style={styles.dropdown}>
+            {filteredMedicines.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.dropdownItem}
+                onPress={() => selectMedicine(item.name)}
+              >
+                <Text style={styles.dropdownText}>{item.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
 
       <Text style={styles.label}>Dosage</Text>
       <TextInput
@@ -145,6 +204,7 @@ const AddMedicineScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
         <Text style={styles.saveText}>Save Medicine</Text>
       </TouchableOpacity>
+      <View style={{ height: 50 }} />
     </ScrollView>
   );
 };
@@ -152,6 +212,9 @@ const AddMedicineScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   label: { fontSize: 16, fontWeight: '600', marginTop: 15 },
+  inputContainer: {
+    zIndex: 10, // Ensure dropdown appears above other elements
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -159,6 +222,33 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 6,
     fontSize: 15,
+    backgroundColor: '#fff',
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    maxHeight: 200,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dropdownText: {
+    fontSize: 14,
+    color: '#333',
   },
   iconRow: { flexDirection: 'row', marginTop: 10 },
   iconButton: {
