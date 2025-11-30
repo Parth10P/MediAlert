@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getMedicines, updateMedicineStatus, saveHistory } from '../storage/storageUtils';
+import { getMedicines, updateMedicineStatus, saveHistory, fillMissingHistory } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const iconMap = {
@@ -36,10 +36,11 @@ export default function DailyScheduleScreen() {
 
     setMedicines(updatedMeds);
     
-    // If we reset any medicines, update storage
     if (JSON.stringify(meds) !== JSON.stringify(updatedMeds)) {
       await updateMedicineStatus(updatedMeds);
     }
+    
+    await fillMissingHistory(updatedMeds.length);
   };
 
   const toggleTaken = async (id) => {
@@ -81,7 +82,6 @@ export default function DailyScheduleScreen() {
     await saveHistory(today, taken, skipped);
   };
 
-  // Simulate next day for testing purposes
   const simulateNextDay = async () => {
     const meds = await getMedicines();
     const yesterday = new Date();
