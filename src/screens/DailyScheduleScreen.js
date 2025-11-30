@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { getMedicines, updateMedicineStatus, saveHistory, fillMissingHistory } from '../storage/storageUtils';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-
 const iconMap = {
   1: <Ionicons name="medkit" size={22} />,
   2: <MaterialCommunityIcons name="pill" size={22} />,
@@ -13,46 +12,38 @@ const iconMap = {
   5: <Ionicons name="thermometer-outline" size={22} />,
   6: <Ionicons name="heart" size={22} />,
 };
-
 export default function DailyScheduleScreen({ navigation }) {
   const [medicines, setMedicines] = useState([]);
-
   useFocusEffect(
     useCallback(() => {
       loadMedicines();
     }, [])
   );
-
   const loadMedicines = async () => {
     const meds = await getMedicines();
     const today = new Date().toDateString();
-
     const updatedMeds = meds.map(med => {
       // Migration: Ensure status field exists
       let status = med.status;
       if (!status) {
         status = med.taken ? 'taken' : 'pending';
       }
-
       if (med.lastTakenDate !== today) {
         // Reset for new day
         return { ...med, status: 'pending', taken: false };
       }
       return { ...med, status };
     });
-
     setMedicines(updatedMeds);
     if (JSON.stringify(meds) !== JSON.stringify(updatedMeds)) {
       await updateMedicineStatus(updatedMeds);
     }
     await fillMissingHistory(updatedMeds.length);
   };
-
   const updateStatus = async (id, newStatus) => {
     const updatedMedicines = medicines.map(med => {
       if (med.id === id) {
         let newStock = med.stock;
-
         // Handle stock logic
         if (med.stock !== null && med.stock !== undefined) {
           // If marking as taken
@@ -67,7 +58,6 @@ export default function DailyScheduleScreen({ navigation }) {
             newStock = med.stock + 1;
           }
         }
-
         return {
           ...med,
           status: newStatus,
@@ -78,14 +68,11 @@ export default function DailyScheduleScreen({ navigation }) {
       }
       return med;
     });
-
     setMedicines(updatedMedicines);
     await updateMedicineStatus(updatedMedicines);
-
     const today = new Date().toISOString().split('T')[0];
     const taken = updatedMedicines.filter(m => m.status === 'taken').length;
     const skipped = updatedMedicines.filter(m => m.status === 'skipped').length;
-
     const details = updatedMedicines.map(m => ({
       id: m.id,
       name: m.name,
@@ -93,24 +80,20 @@ export default function DailyScheduleScreen({ navigation }) {
       status: m.status,
       color: m.color
     }));
-
     await saveHistory(today, taken, skipped, details);
   };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Today's Schedule</Text>
         </View>
-
         {medicines.length === 0 && (
           <View style={styles.emptyBox}>
             <Text style={styles.emptyText}>No medicines added yet.</Text>
             <Text style={styles.emptySub}>Tap + on Home to add medicines</Text>
           </View>
         )}
-
         {medicines.map(med => (
           <View key={med.id} style={[styles.card, { borderLeftColor: med.color }]}>
             <View style={styles.cardLeft}>
@@ -130,7 +113,6 @@ export default function DailyScheduleScreen({ navigation }) {
                 ) : null}
               </View>
             </View>
-
             <View style={styles.actionButtons}>
               {med.status === 'taken' ? (
                 <TouchableOpacity onPress={() => updateStatus(med.id, 'pending')} style={[styles.statusBtn, styles.takenBtn]}>
@@ -157,11 +139,10 @@ export default function DailyScheduleScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#F8F8F8',
   },
   container: {
     flex: 1,
@@ -189,7 +170,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 20,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#E0E0E0',
   },
   missedText: {
     marginLeft: 5,
@@ -202,7 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#FAFAFA',
     borderRadius: 10,
     borderLeftWidth: 5,
     marginBottom: 12,
@@ -223,7 +204,6 @@ const styles = StyleSheet.create({
   stockText: { fontSize: 12, color: '#666', marginTop: 2 },
   lowStock: { color: '#FF6B6B', fontWeight: 'bold' },
   memberTag: { fontSize: 13, marginTop: 3, color: '#555' },
-
   actionButtons: {
     flexDirection: 'row',
     gap: 8,
@@ -240,7 +220,6 @@ const styles = StyleSheet.create({
   skipBtn: { backgroundColor: '#FFB74D' },
   skippedBtn: { backgroundColor: '#9E9E9E' },
   statusText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
-
   emptyBox: { alignItems: 'center', marginTop: 80 },
   emptyText: { fontSize: 18, fontWeight: '600', color: '#555' },
   emptySub: { fontSize: 14, marginTop: 8, color: 'gray' },
